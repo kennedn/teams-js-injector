@@ -3,8 +3,8 @@
 This is a fork of eariassoto's [repo](https://github.com/eariassoto/teams-js-injector). This is a customised version that introduces the following:
 
 - Fix to cater for the newer Teams WebView edition that has the side / top bar and chat contents in different WebContents. Each WebContent requires its own injection
-- Now marshal and display the Websocket response to give feedback on syntax issues
-- Randomised websocket port to work around quick successive teams restarts failing
+- WebSocket response now marshalled and displayed to give feedback on syntax issues
+- Randomised websocket port to work around quick successive teams restarts failing due to port locks
 
 teams-patch.js does the following:
 - Custom Highlight colour for most elements in the chat tab
