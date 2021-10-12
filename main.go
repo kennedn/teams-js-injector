@@ -6,32 +6,38 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
 
 const (
-	TeamsPath = "C:\\Users\\%s\\AppData\\Local\\Microsoft\\Teams\\current\\Teams.exe"
+	TeamsPath = "C:\\Program Files (x86)\\Microsoft\\Teams\\current\\Teams.exe"
 )
 
 func killAllTeamsProcesses() {
+	log.Println("Stopping Teams")
 	cmnd := exec.Command("taskkill", "/f", "/im", "Teams.exe")
 	cmnd.Start()
 	cmnd.Wait()
+	time.Sleep(1000 * time.Millisecond)
 }
 
 func launchTeamProcess(path string, debugPort int) {
+	log.Printf("Starting Teams with debug port %d\n", debugPort)
 	cmnd := exec.Command(path, fmt.Sprintf("--remote-debugging-port=%d", debugPort))
 	cmnd.Start()
 }
 
-func getChatWsDebuggerURL(debugPort int) string {
-	log.Println("Make sure you have a chat windows open")
+func waitForInjectTargets(debugPort int, message map[string]interface{}) {
 	urlFound := false
-	var url string
+	mainFound := false
+	webviewFound := false
 	for !urlFound {
 		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/json", debugPort))
 		if err != nil {
@@ -40,14 +46,22 @@ func getChatWsDebuggerURL(debugPort int) string {
 		var result []map[string]interface{}
 
 		json.NewDecoder(resp.Body).Decode(&result)
-		for i := 0; i < len(result); i++ {
-			if result[i]["title"] == "Chat | Microsoft Teams" {
-				url = result[i]["webSocketDebuggerUrl"].(string)
-				urlFound = true
+		for i := len(result) - 1; i >= 0; i-- {
+			if strings.Contains(result[i]["title"].(string), "| Microsoft Teams") && !mainFound {
+				log.Printf("Injecting to window, type: %s, title: %s", result[i]["type"], result[i]["title"])
+				sendMessage(result[i]["webSocketDebuggerUrl"].(string), message)
+				mainFound = true
+			} else if result[i]["type"] == "webview" && strings.Contains(result[i]["title"].(string), "multi-window") && !webviewFound {
+				log.Printf("Injecting to window, type: %s, title: %s", result[i]["type"], result[i]["title"])
+				sendMessage(result[i]["webSocketDebuggerUrl"].(string), message)
+				webviewFound = true
 			}
 		}
+		if mainFound && webviewFound {
+			urlFound = true
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
-	return url
 }
 
 func makeRequestMessage(payload string) map[string]interface{} {
@@ -64,8 +78,7 @@ func makeRequestMessage(payload string) map[string]interface{} {
 }
 
 func sendMessage(wsURL string, message map[string]interface{}) {
-	b, err := json.Marshal(message)
-	log.Println(string(b))
+	_, err := json.Marshal(message)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -77,9 +90,19 @@ func sendMessage(wsURL string, message map[string]interface{}) {
 	}
 	defer conn.Close()
 
+	var data map[string]interface{}
 	if err = websocket.JSON.Send(conn, message); err != nil {
 		log.Panicln(err)
 	}
+	if err = websocket.JSON.Receive(conn, &data); err != nil {
+		log.Panicln(err)
+	}
+	b, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Response: %s\n", string(b))
+
 }
 
 func readFile(path string) string {
@@ -96,26 +119,22 @@ func readFile(path string) string {
 }
 
 func main() {
-	debugPort := flag.Int("debug-port", 9222, "Port number for Chromium remote debugging")
+	rand.Seed(time.Now().UnixNano())
+	debugPort := flag.Int("debug-port", rand.Intn(65500-9000+1)+9000, "Port number for Chromium remote debugging")
+	log.Printf("Using debug port %d", *debugPort)
+	teamsExePath := flag.String("teams-path", TeamsPath, "Location of Teams executable")
 
-	user := os.Getenv("USERNAME")
-	defaultPath := fmt.Sprintf(TeamsPath, user)
-	teamsExePath := flag.String("teams-path", defaultPath, "Location of Teams executable")
-
-	payloadFile := flag.String("payload-file", "payload.js", "Javascript file to inject")
+	payloadFile := flag.String("payload-file", "teams-patch.js", "Javascript file to inject")
 	flag.Parse()
 
 	killAllTeamsProcesses()
 
 	launchTeamProcess(*teamsExePath, *debugPort)
 
-	wsURL := getChatWsDebuggerURL(*debugPort)
-
 	payload := readFile(*payloadFile)
-	log.Println(payload)
 	request := makeRequestMessage(payload)
 
-	sendMessage(wsURL, request)
+	waitForInjectTargets(*debugPort, request)
 
-	log.Println("Program finished, you can now close this windows")
+	log.Printf("Injected %s\n", *payloadFile)
 }
