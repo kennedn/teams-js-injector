@@ -1,9 +1,10 @@
 "use strict";
-let highlight_color = "#FF00554f";
+// let highlight_color = "#FF00554f";
+let highlight_color = "#14897da0";
 
 let main_rules = [
 
-		//Custom Highlight Color
+		//Custom Highlight C	olor
 		`.app-header-bar { background: ${highlight_color}; }`,
 		`.app-bar button.app-bar-link.app-bar-selected { background-color: ${highlight_color}; background-image: none; }`,
 		`.message-list-divider-text { color:  ${highlight_color}; }`,
@@ -17,10 +18,12 @@ let main_rules = [
         ".recipient-group-list-item.left-rail-item-hover { height: 2.8rem !important; }",
 		".chat-list .profile-img-parent { width: 2rem; height: 2rem;}",
 		".chat-list .profile-img-parent img { vertical-align: top !important;}",
+		".chat-list .mute-chat-icon { width: 2rem; height: 2rem;}",
+		".chat-list .mute-chat-icon svg { vertical-align: top !important;}",
 		".left-rail-unread::before { top: 1.2rem !important; }",
 		".ts-skype-status .status-icon { height: 2rem !important; }",
 		".chat-list .recipient-group-list-item a.cle-item { grid-template-rows: 1rem 1rem !important; padding: .55rem 1.8rem 0 2rem; }",
-        `a.cle-item.left-rail-unread.ts-unread-channel { background-color: rgb(255, 0, 85, 0.46); height: 2.8rem !important; }`,
+        `a.cle-item.left-rail-unread.ts-unread-channel { background-color: ${highlight_color}; height: 2.8rem !important; }`,
 
         `.message-list-divider::before { border-top: 1px solid ${highlight_color} !important; }`,
         `.app-bar button.app-bar-link.app-bar-selected { color: white !important; }`,
@@ -32,17 +35,21 @@ let main_rules = [
     ];
 let webview_rules = [
         `.ui-alert {display: none !important;}`,
-        `.ui-box  {margin-top: 0rem !important;}`,
-        `.ms-FocusZone.ui-chat__message {padding-top: 0.6rem !important;}`,
-        `.ui-box.ui-chat__item__message:first-child > .ui-box > .ms-FocusZone {background-color: ${highlight_color} !important;}`,
-        `.ui-divider::before {background-color: rgb(61, 61, 61) !important;}`,
-        `.ui-divider::after {background-color: rgb(61, 61, 61) !important;}`,
-        `.ui-divider {color: ${highlight_color} !important;}`,
+        // `.ui-box  {margin-top: 0rem !important;}`,
+        `.ms-FocusZone.ui-chat__message {padding-top: 0.6rem !important;}`,													// Chat message box
+        `.ui-box.ui-chat__item__message:first-child .ms-FocusZone {background-color: ${highlight_color} !important;}`,		// Chat message box
+        `.ui-divider::before {background-color: rgb(61, 61, 61) !important;}`,												// Chat window seperator
+        `.ui-divider::after {background-color: rgb(61, 61, 61) !important;}`,												// Chat window seperator
+        `.ui-divider {color: ${highlight_color} !important;}`,																// Chat window seperator
         `.ui-icon[id^="read-status-icon-"] {color: ${highlight_color} !important;}`,
         `li.ui-chat__item.ui-chat__item--message {padding-top: 0.6rem !important;}`,
         `.ui-box:focus-within {box-shadow: none !important;}`,
         `.vl-placeholder-bg2 {fill: ${highlight_color} !important;}`,
-        `a {color: rgb(48, 117, 187) !important; font-weight: bold !important;}`
+        `a {color: rgb(48, 117, 187) !important; font-weight: bold !important;}`,  											// Hyperlinks
+		`.ui-chat__message__reactions .fui-StyledText {color: white !important;}`, 											// Emoji text
+		`.ui-button[data-tid="new-messages-button"] {background-color: ${highlight_color} !important;}`,					// New message scroll button
+		`.ui-flex[data-tid="smart-replies-renderer"] {display: none !important;}`											// Smart replays
+
 	];
 
 
@@ -58,6 +65,16 @@ function injectStyleSheet() {
 		main_rules.forEach(function(rule) {
 			sheet.insertRule(rule, 0)
 		});
+		let muteCheck = setInterval(() => {
+			document.querySelectorAll(".recipient-group-list-item").forEach(item => {
+				if (item.querySelector('.mute-chat-icon')) {
+					item.querySelector('a.cle-item').className = "cle-item";
+					if(item.querySelector('.cle-marker')) {item.querySelector('.cle-marker').style.display = "none";}
+				} else {
+					if(item.querySelector('.cle-marker')) {item.querySelector('.cle-marker').style.display = "";}
+				}
+			});
+		}, 100);
 	} else {
 		webview_rules.forEach(function(rule) {
 			sheet.insertRule(rule, 0)
@@ -69,11 +86,11 @@ function injectStyleSheet() {
 function observeAndFixIcons() {
 	let iconObserver = new MutationObserver((mutations) => {
 	  mutations.forEach((mutation) => {
-	  	 if(mutation.attributeName != "src" && mutation.target.className == "media-object"){
-	  	 	 let attr = mutation.target.getAttribute("src");
-	  	 	 attr = attr.replace('&size=HR42x42','');
-	  	 	 mutation.target.src = attr;
-	  	 }
+	  	//  if(mutation.attributeName != "src" && mutation.target.className == "media-object"){
+	  	//  	 let attr = mutation.target.getAttribute("src");
+	  	//  	 attr = attr.replace('&size=HR42x42','');
+	  	//  	 mutation.target.src = attr;
+	  	//  }
 	  })
 	})
 
@@ -84,7 +101,6 @@ let stateCheck = setInterval(() => {
   if (document.readyState === 'complete') {
     clearInterval(stateCheck);
 	injectStyleSheet();
-	observeAndFixIcons();
   }
 }, 100);
 

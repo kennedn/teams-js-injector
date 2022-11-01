@@ -29,9 +29,14 @@ func killAllTeamsProcesses() {
 }
 
 func launchTeamProcess(path string, debugPort int) {
-	log.Printf("Starting Teams with debug port %d\n", debugPort)
-	cmnd := exec.Command(path, fmt.Sprintf("--remote-debugging-port=%d", debugPort))
-	cmnd.Start()
+	for i := 3; i > 0; i-- {
+		log.Printf("Attempting to Start Teams with debug port %d\n", debugPort)
+		cmnd := exec.Command(path, fmt.Sprintf("--remote-debugging-port=%d", debugPort))
+		cmnd.Start()
+		if err := cmd.Start(); err != nil { continue; }
+		log.Printf("Successfully started Teams")
+		break;
+	}
 }
 
 func waitForInjectTargets(debugPort int, message map[string]interface{}) {
