@@ -1,107 +1,112 @@
 "use strict";
-// let highlight_color = "#FF00554f";
-let highlight_color = "#14897da0";
-
-let main_rules = [
-
-		//Custom Highlight C	olor
-		`.app-header-bar { background: ${highlight_color}; }`,
-		`.app-bar button.app-bar-link.app-bar-selected { background-color: ${highlight_color}; background-image: none; }`,
-		`.message-list-divider-text { color:  ${highlight_color}; }`,
-		`.app-tabs .btn-default.app-tabs-selected, .app-tabs .icons-more.app-tabs-selected, .app-tabs .ts-tabs-chevron.app-tabs-selected { border-bottom-color: ${highlight_color}; color: ${highlight_color};}`,
-		`.chat-style .self .message-actions-container, .chat-style .self .message-body { background: ${highlight_color};}`,
-		`.app-header-bar .me-profile:hover, body.acc-keyboard-mode .app-header-bar .me-profile:focus {background-color: ${highlight_color}; }`,
-		`.app-bar button:hover.app-bar-link.app-bar-selected, body.acc-keyboard-mode .app-bar button:focus.app-bar-link.app-bar-selected {background-color: ${highlight_color};}`,
-
-		// Chat list resize
-		"span.cle-preview.single-line-truncation { display: none; }",
-        ".recipient-group-list-item.left-rail-item-hover { height: 2.8rem !important; }",
-		".chat-list .profile-img-parent { width: 2rem; height: 2rem;}",
-		".chat-list .profile-img-parent img { vertical-align: top !important;}",
-		".chat-list .mute-chat-icon { width: 2rem; height: 2rem;}",
-		".chat-list .mute-chat-icon svg { vertical-align: top !important;}",
-		".left-rail-unread::before { top: 1.2rem !important; }",
-		".ts-skype-status .status-icon { height: 2rem !important; }",
-		".chat-list .recipient-group-list-item a.cle-item { grid-template-rows: 1rem 1rem !important; padding: .55rem 1.8rem 0 2rem; }",
-        `a.cle-item.left-rail-unread.ts-unread-channel { background-color: ${highlight_color}; height: 2.8rem !important; }`,
-
-        `.message-list-divider::before { border-top: 1px solid ${highlight_color} !important; }`,
-        `.app-bar button.app-bar-link.app-bar-selected { color: white !important; }`,
-        `.messages-header-v2 .app-chat-header .group-chat-recipients-button.selected, .messages-header-v2 .app-chat-header .group-chat-recipients-button:hover { background: ${highlight_color}; !important}`,
-        `.app-chat-header .app-title-bar-button.icons-call, .ts-title-bar-team-header .app-title-bar-button.icons-call { background: transparent !important}`,
-        `.app-chat-header .app-title-bar-button.icons-call, .ts-title-bar-team-header .app-title-bar-button.icons-call:hover { background: ${highlight_color}; !important}`,
-        `.slash-submit-button:hover, .ts-title-bar-buttons .app-title-bar-button:hover { background: transparent !important}`,
-        `.app-bar .app-bar-selected::before {border-left: solid .2rem ${highlight_color} !important; background: ${highlight_color} !important;}`
-    ];
-let webview_rules = [
-        `.ui-alert {display: none !important;}`,
-        // `.ui-box  {margin-top: 0rem !important;}`,
-        `.ms-FocusZone.ui-chat__message {padding-top: 0.6rem !important;}`,													// Chat message box
-        `.ui-box.ui-chat__item__message:first-child .ms-FocusZone {background-color: ${highlight_color} !important;}`,		// Chat message box
-        `.ui-divider::before {background-color: rgb(61, 61, 61) !important;}`,												// Chat window seperator
-        `.ui-divider::after {background-color: rgb(61, 61, 61) !important;}`,												// Chat window seperator
-        `.ui-divider {color: ${highlight_color} !important;}`,																// Chat window seperator
-        `.ui-icon[id^="read-status-icon-"] {color: ${highlight_color} !important;}`,
-        `li.ui-chat__item.ui-chat__item--message {padding-top: 0.6rem !important;}`,
-        `.ui-box:focus-within {box-shadow: none !important;}`,
-        `.vl-placeholder-bg2 {fill: ${highlight_color} !important;}`,
-        `a {color: rgb(48, 117, 187) !important; font-weight: bold !important;}`,  											// Hyperlinks
-		`.ui-chat__message__reactions .fui-StyledText {color: white !important;}`, 											// Emoji text
-		`.ui-button[data-tid="new-messages-button"] {background-color: ${highlight_color} !important;}`,					// New message scroll button
-		`.ui-flex[data-tid="smart-replies-renderer"] {display: none !important;}`											// Smart replays
-
-	];
+var highlight_color = "#14897da0";
+var highlight_color_lighter = "#14897d";
+var highlight_color_links = "#1fd0be";
+var rules = [
+	// Hide Out of office messages, etc
+	`.ui-alert {
+		display: none !important;
+	}`,
+	// Fix message box border when ui-alert is trying to display
+	`.fui-Primitive:has(> div[data-tid='simplified-formatting-toolbar']) {
+		border-top-left-radius: 6px !important; 
+		border-top-right-radius: 6px !important;
+		border-top: 1px solid var(--colorNeutralStroke2) !important;
+	}`, 
+	// Sent chat message color
+	`div.fui-ChatMyMessage__body {
+		background-color: ${highlight_color} !important;
+	}`,
+	// Highlight unread messages in left pane
+	`div[data-tid="chat-list-item"]:has(> .chatListItem_unreadIndicator) {
+		background-color: ${highlight_color} !important; 
+		border-radius: var(--borderRadiusMedium)!important;
+	}`,
+	// System colors
+	`.fui-FluentProviderr0 {
+		--colorNeutralForeground2BrandHover: ${highlight_color};
+		--colorNeutralForeground2BrandPressed: ${highlight_color};
+		--colorNeutralForeground2BrandSelected: ${highlight_color};
+		--colorNeutralForeground3BrandHover: ${highlight_color};
+		--colorNeutralForeground3BrandPressed: ${highlight_color};
+		--colorNeutralForeground3BrandSelected: ${highlight_color_lighter};
+		--colorBrandForegroundLink: ${highlight_color_links};
+		--colorBrandForegroundLinkHover: ${highlight_color};
+		--colorBrandForegroundLinkPressed: ${highlight_color};
+		--colorBrandForegroundLinkSelected: ${highlight_color};
+		--colorCompoundBrandForeground1: ${highlight_color};
+		--colorCompoundBrandForeground1Hover: ${highlight_color};
+		--colorCompoundBrandForeground1Pressed: ${highlight_color};
+		--colorBrandForeground1: ${highlight_color};
+		--colorBrandForeground2: ${highlight_color};
+		--colorBrandForeground2Hover: ${highlight_color};
+		--colorBrandForeground2Pressed: ${highlight_color};
+		--colorNeutralForegroundOnBrand: white;
+		--colorBrandForegroundInverted: ${highlight_color};
+		--colorBrandForegroundInvertedHover: ${highlight_color};
+		--colorBrandForegroundInvertedPressed: ${highlight_color};
+		--colorBrandForegroundOnLight: ${highlight_color};
+		--colorBrandForegroundOnLightHover: ${highlight_color};
+		--colorBrandForegroundOnLightPressed: ${highlight_color};
+		--colorBrandForegroundOnLightSelected: ${highlight_color};
+		--colorBrandBackground: ${highlight_color};
+		--colorBrandBackgroundHover: ${highlight_color};
+		--colorBrandBackgroundPressed: ${highlight_color};
+		--colorBrandBackgroundSelected: ${highlight_color};
+		--colorCompoundBrandBackground: ${highlight_color};
+		--colorCompoundBrandBackgroundHover: ${highlight_color};
+		--colorCompoundBrandBackgroundPressed: ${highlight_color};
+		--colorBrandBackgroundStatic: ${highlight_color};
+		--colorBrandBackground2: ${highlight_color};
+		--colorBrandBackground2Hover: ${highlight_color};
+		--colorBrandBackground2Pressed: ${highlight_color};
+		--colorBrandBackground3Static: ${highlight_color};
+		--colorBrandBackground4Static: ${highlight_color};
+		--colorBrandBackgroundInverted: ${highlight_color};
+		--colorBrandBackgroundInvertedHover: ${highlight_color};
+		--colorBrandBackgroundInvertedPressed: ${highlight_color};
+		--colorBrandBackgroundInvertedSelected: ${highlight_color};
+		--colorNeutralStrokeOnBrand: ${highlight_color};
+		--colorNeutralStrokeOnBrand2: ${highlight_color};
+		--colorNeutralStrokeOnBrand2Hover: ${highlight_color};
+		--colorNeutralStrokeOnBrand2Pressed: ${highlight_color};
+		--colorNeutralStrokeOnBrand2Selected: ${highlight_color};
+		--colorBrandStroke1: ${highlight_color};
+		--colorBrandStroke2: ${highlight_color};
+		--colorBrandStroke2Hover: ${highlight_color};
+		--colorBrandStroke2Pressed: ${highlight_color};
+		--colorBrandStroke2Contrast: ${highlight_color};
+		--colorCompoundBrandStroke: ${highlight_color};
+		--colorCompoundBrandStrokeHover: ${highlight_color};
+		--colorCompoundBrandStrokePressed: ${highlight_color};
+		--colorTeamsBrand1Hover: ${highlight_color};
+		--colorTeamsBrand1Pressed: ${highlight_color};
+		--colorTeamsBrand1Selected: ${highlight_color};
+	}`
+];
 
 
 function injectStyleSheet() {
 	if (document == null) {return;}
-	let sheet = (function() {
-		var style = document.createElement("style")
-	    style.appendChild(document.createTextNode(""))
-	    document.head.appendChild(style)
-	    return style.sheet
+	// remove old stylesheet if exist
+	document.getElementById("teams-js-injector")?.remove();
+	var sheet = (function() {
+		var style = document.createElement("style");
+		style.id = "teams-js-injector";
+	    style.appendChild(document.createTextNode(""));
+	    document.head.appendChild(style);
+	    return style.sheet;
 	})();
-	if (document.title.includes("| Microsoft Teams")) {
-		main_rules.forEach(function(rule) {
-			sheet.insertRule(rule, 0)
-		});
-		let muteCheck = setInterval(() => {
-			document.querySelectorAll(".recipient-group-list-item").forEach(item => {
-				if (item.querySelector('.mute-chat-icon')) {
-					item.querySelector('a.cle-item').className = "cle-item";
-					if(item.querySelector('.cle-marker')) {item.querySelector('.cle-marker').style.display = "none";}
-				} else {
-					if(item.querySelector('.cle-marker')) {item.querySelector('.cle-marker').style.display = "";}
-				}
-			});
-		}, 100);
-	} else {
-		webview_rules.forEach(function(rule) {
-			sheet.insertRule(rule, 0)
-		});
-
-	}
+	rules.forEach(function(rule) {
+		sheet.insertRule(rule, 0);
+	});
 }
 
-function observeAndFixIcons() {
-	let iconObserver = new MutationObserver((mutations) => {
-	  mutations.forEach((mutation) => {
-	  	//  if(mutation.attributeName != "src" && mutation.target.className == "media-object"){
-	  	//  	 let attr = mutation.target.getAttribute("src");
-	  	//  	 attr = attr.replace('&size=HR42x42','');
-	  	//  	 mutation.target.src = attr;
-	  	//  }
-	  })
-	})
-
-	iconObserver.observe(document.body, {attributes: true, childList: true, characterData: false, subtree: true })
-}
-
-let stateCheck = setInterval(() => {
+var stateCheck = setInterval(() => {
   if (document.readyState === 'complete') {
     clearInterval(stateCheck);
 	injectStyleSheet();
   }
-}, 100);
+}, 10);
 
   
