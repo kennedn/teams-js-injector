@@ -18,9 +18,22 @@ var rules = [
 		background-color: ${highlight_color} !important;
 	}`,
 	// Highlight unread messages in left pane
-	`div[data-tid="chat-list-item"]:has(> .chatListItem_unreadIndicator) {
+	`div[aria-labelledby*="channel-list-unread-text"], div[aria-labelledby*="chat_list_unread_text"]:not(:has(span[data-testid="muted-icon"])) {
 		background-color: ${highlight_color} !important; 
-		border-radius: var(--borderRadiusMedium)!important;
+		border-radius: var(--borderRadiusMedium) !important;
+		box-shadow: 0 0 0 1px var(--colorNeutralStrokeAlpha) !important; 
+	}`,
+	// Remove all highlighting for muted chats
+	`div[aria-labelledby*="chat_list_unread_text"]:has(span[data-testid="muted-icon"]) div.fui-TreeItemLayout__iconBefore::before {
+		background-color: rgba(0,0,0,0) !important;
+	}`,
+	`div[aria-labelledby*="chat_list_unread_text"]:has(span[data-testid="muted-icon"]) div.fui-TreeItemLayout__main span {
+		font-weight: var(--fontWeightRegular) !important;
+		color: var(--colorNeutralForeground2) !important;
+	}`,
+	// Hide Teams and channel left rail jumper button
+	`div[data-id="left-rail-teams-and-channels-jumper"] {
+		display: none !important;
 	}`,
 	// System colors
 	`.fui-FluentProviderr0 {
@@ -30,8 +43,8 @@ var rules = [
 		--colorNeutralForeground3BrandHover: ${highlight_color};
 		--colorNeutralForeground3BrandPressed: ${highlight_color};
 		--colorNeutralForeground3BrandSelected: ${highlight_color_lighter};
-		--colorBrandForegroundLink: ${highlight_color_links};
-		--colorBrandForegroundLinkHover: ${highlight_color};
+		--colorBrandForegroundLink: ${highlight_color};
+		--colorBrandForegroundLinkHover: ${highlight_color_links};
 		--colorBrandForegroundLinkPressed: ${highlight_color};
 		--colorBrandForegroundLinkSelected: ${highlight_color};
 		--colorCompoundBrandForeground1: ${highlight_color};
@@ -109,4 +122,4 @@ var stateCheck = setInterval(() => {
   }
 }, 10);
 
-  
+
